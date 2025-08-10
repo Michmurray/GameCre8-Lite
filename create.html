@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GameCre8 — Create</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:18px}
+  .card{max-width:640px;border:1px solid #e7ecf3;border-radius:12px;padding:16px}
+  textarea,input,select{width:100%;padding:12px;border:1px solid #e7ecf3;border-radius:10px}
+  button{padding:12px 16px;border:1px solid #111;background:#111;color:#fff;border-radius:10px;cursor:pointer}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .muted{color:#666}
+  .progress{margin-top:12px;padding:10px;border:1px dashed #ccd;border-radius:10px;display:none}
+</style>
+</head>
+<body>
+<h2>Ollie — Let’s create your game</h2>
+<p class="muted">Give me the core idea in one quick line. I’ll build the rest.</p>
+<div class="card">
+  <label>Idea (≤220 chars)</label>
+  <textarea id="idea" maxlength="220" rows="3" placeholder="Unicorn runner: jump between clouds, collect rings, dodge fireballs."></textarea>
+  <div class="row" style="margin-top:10px">
+    <div style="flex:1 1 160px">
+      <label>Genre</label>
+      <select id="genre">
+        <option>runner</option>
+        <option>platformer</option>
+        <option>puzzle</option>
+        <option>topdown</option>
+        <option>endless</option>
+      </select>
+    </div>
+    <div style="flex:1 1 160px">
+      <label>Age band</label>
+      <select id="age">
+        <option>kids</option>
+        <option>tweens</option>
+        <option selected>teens</option>
+      </select>
+    </div>
+    <div style="flex:1 1 160px">
+      <label>Difficulty</label>
+      <select id="diff">
+        <option>easy</option>
+        <option selected>medium</option>
+        <option>hard</option>
+      </select>
+    </div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <button id="go">Create Game</button>
+  </div>
+  <div class="progress" id="prog">Ollie is assembling your world… physics, art, and goals ✨</div>
+</div>
+<script>
+const go=document.getElementById('go'), idea=document.getElementById('idea');
+const genre=document.getElementById('genre'), age=document.getElementById('age'), diff=document.getElementById('diff');
+const prog=document.getElementById('prog');
+go.onclick=async()=>{
+  const prompt=(idea.value||'').trim();
+  if(!prompt){ alert('Tell me the core idea first 🙂'); return; }
+  prog.style.display='block';
+  try{
+    const res=await fetch('/api/create',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({prompt, genre:genre.value, ageBand:age.value, difficulty:diff.value})});
+    const data=await res.json();
+    if(!res.ok || !data?.url){ throw new Error(data?.error||'Create failed'); }
+    location.href=data.url; // auto-redirect to pretty /play/<slug>
+  }catch(e){
+    prog.textContent='Something went wrong. Please try again.';
+  }
+};
+</script>
+</body>
+</html>
